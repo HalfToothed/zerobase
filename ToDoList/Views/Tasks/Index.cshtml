@@ -1,0 +1,118 @@
+﻿@{
+    ViewData["Title"] = "Tasks";
+    Layout = "_Layout"; // or remove if you don't use a shared layout
+}
+
+<link rel="stylesheet" href="~/css/site.css" />
+
+
+<div class="container" id="tasks-app">
+    <header>
+        <h1>To-Do Board</h1>
+        <p class="muted">Handlebars + Knockout — single page</p>
+    </header>
+
+    <!-- Create task form -->
+    <section class="card create-form">
+        <h3>Create task</h3>
+        <div class="form-row">
+            <input type="text" placeholder="Title" data-bind="value: newTitle, valueUpdate: 'afterkeydown'" />
+        </div>
+        <div class="form-row">
+            <textarea placeholder="Description (optional)" rows="3" data-bind="value: newDescription"></textarea>
+        </div>
+        <div class="form-row controls">
+            <input type="date" data-bind="value: newDueDate" />
+            <select data-bind="value: newPriority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <button data-bind="click: addTask, enable: newTitle().trim().length > 0">Add</button>
+            <button data-bind="click: clearForm">Clear</button>
+        </div>
+        <div class="form-row muted" data-bind="visible: saving()">Saving...</div>
+    </section>
+
+    <!-- Controls: search / filter / sort -->
+    <section class="card controls">
+        <input type="text" placeholder="Search tasks" data-bind="value: searchText, valueUpdate: 'afterkeydown'" />
+        <select data-bind="value: filterStatus">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+        </select>
+        <select data-bind="value: sortBy">
+            <option value="createdAt">Newest</option>
+            <option value="dueDate">Due date</option>
+            <option value="priority">Priority</option>
+            <option value="orderIndex">Manual order</option>
+        </select>
+        <div class="chip">Total: <span data-bind="text: totalCount"></span></div>
+        <div class="chip">Active: <span data-bind="text: activeCount"></span></div>
+        <div class="chip">Done: <span data-bind="text: completedCount"></span></div>
+    </section>
+
+    <!-- Tasks list container (will be filled by compiled Handlebars templates) -->
+    <section id="tasks-root" class="card-list">
+        <!-- app.js will render items here -->
+    </section>
+
+    <!-- Handlebars templates -->
+    <script id="template-task-item" type="text/x-handlebars-template">
+        <div class="card task-item {{#if isCompleted}}done{{/if}}" data-id="{{id}}">
+          <div class="task-row">
+            <div class="task-main">
+              <h4 class="task-title">{{title}}</h4>
+              {{#if description}}
+                <p class="task-desc">{{description}}</p>
+              {{/if}}
+              <div class="muted small">
+                {{#if dueDate}}Due: {{dueDate}} • {{/if}} Priority: {{priority}} • Created: {{createdAt}}
+              </div>
+            </div>
+
+            <div class="task-actions">
+              <button data-action="toggle" data-id="{{id}}">{{#if isCompleted}}Undo{{else}}Done{{/if}}</button>
+              <button data-action="edit" data-id="{{id}}">Edit</button>
+              <button data-action="delete" data-id="{{id}}">Delete</button>
+            </div>
+          </div>
+        </div>
+    </script>
+
+    <script id="template-empty" type="text/x-handlebars-template">
+        <div class="card empty">
+          <p>No tasks yet — add your first task above.</p>
+        </div>
+    </script>
+
+    <!-- Optional edit modal template -->
+    <script id="template-edit-modal" type="text/x-handlebars-template">
+        <div class="modal" id="edit-modal">
+          <div class="modal-content">
+            <h3>Edit task</h3>
+            <input type="text" data-bind="value: editingTask().title" />
+            <textarea rows="4" data-bind="value: editingTask().description"></textarea>
+            <div class="controls">
+              <input type="date" data-bind="value: editingTask().dueDate" />
+              <select data-bind="value: editingTask().priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+              <button data-bind="click: saveEdit">Save</button>
+              <button data-bind="click: cancelEdit">Cancel</button>
+            </div>
+          </div>
+        </div>
+    </script>
+
+</div>
+
+<!-- External libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.1/knockout-min.js"></script>
+
+<!-- Your client app (Knockout viewmodel + Handlebars wiring) -->
+<script src="~/js/app.js"></script>
